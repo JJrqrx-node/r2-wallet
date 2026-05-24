@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.zip
+.env
+.env.local
+.DS_Store
+.vite/
+.crx/
+*.log
+.idea/
+.vscode/
+
+# Allow release archives
+!releases/*.zip
