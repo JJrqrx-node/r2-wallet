@@ -3,7 +3,7 @@ import type { ManifestV3Export } from "@crxjs/vite-plugin";
 const manifest: ManifestV3Export = {
   manifest_version: 3,
   name: "R2 Wallet",
-  version: "0.1.14",
+  version: "0.1.15",
   description:
     "Non-custodial wallet for the R-Squared blockchain (r2dex.io). Create accounts, hold balances, sign transactions, and connect to R-Squared dApps.",
   // No default_popup — clicking the toolbar icon opens the side panel
@@ -28,7 +28,12 @@ const manifest: ManifestV3Export = {
     // window.rsquared is defined synchronously at document_start, bypassing
     // the page's CSP (which restricts script-src to 'self').
     {
-      matches: ["https://r2dex.io/*"],
+      matches: [
+        "https://r2dex.io/*",
+        "https://*.r2dex.io/*",
+        "https://roll-r2dex.vercel.app/*",
+        "https://*.roll-r2dex.vercel.app/*",
+      ],
       js: ["src/content/inpage.ts"],
       run_at: "document_start",
       world: "MAIN",
@@ -37,7 +42,12 @@ const manifest: ManifestV3Export = {
     // service worker. Runs in the extension's isolated context so it can
     // call chrome.runtime APIs.
     {
-      matches: ["https://r2dex.io/*"],
+      matches: [
+        "https://r2dex.io/*",
+        "https://*.r2dex.io/*",
+        "https://roll-r2dex.vercel.app/*",
+        "https://*.roll-r2dex.vercel.app/*",
+      ],
       js: ["src/content/content-script.ts"],
       run_at: "document_start",
     },
@@ -45,6 +55,9 @@ const manifest: ManifestV3Export = {
   permissions: ["storage", "sidePanel", "alarms", "downloads", "tabs"],
   host_permissions: [
     "https://r2dex.io/*",
+    "https://*.r2dex.io/*",
+    "https://roll-r2dex.vercel.app/*",
+    "https://*.roll-r2dex.vercel.app/*",
     "https://r2-wallet-download.vercel.app/*",
     "wss://*.rsquared.digital/*",
   ],
@@ -56,7 +69,7 @@ const manifest: ManifestV3Export = {
   },
   content_security_policy: {
     extension_pages:
-      "script-src 'self'; object-src 'self'; connect-src 'self' https://r2dex.io https://r2-wallet-download.vercel.app wss://*.rsquared.digital:8090",
+      "script-src 'self'; object-src 'self'; connect-src 'self' https://r2dex.io https://*.r2dex.io https://roll-r2dex.vercel.app https://r2-wallet-download.vercel.app wss://*.rsquared.digital:8090",
   },
 };
 

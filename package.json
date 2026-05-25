@@ -1,6 +1,6 @@
 {
   "name": "r2-wallet",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Non-custodial wallet for the R-Squared blockchain (r2dex.io).",
   "private": true,
   "license": "MIT",
