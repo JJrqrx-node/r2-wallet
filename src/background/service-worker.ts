@@ -822,7 +822,13 @@ async function handleDappRequestAccounts(
 
   // Otherwise queue an explicit approval prompt — even if unlocked. The user
   // must approve each new origin once.
-  return queueApproval("requestAccounts", origin, msg.requestId, undefined);
+  return queueApproval(
+    "requestAccounts",
+    origin,
+    msg.requestId,
+    undefined,
+    sender.tab?.id
+  );
 }
 
 async function handleListConnections(): Promise<{ connections: ConnectionEntry[] }> {
@@ -897,7 +903,8 @@ async function handleDappSignTransaction(
     "signTransaction",
     origin,
     msg.requestId,
-    msg.txEnvelope
+    msg.txEnvelope,
+    sender.tab?.id
   );
 }
 
@@ -958,15 +965,29 @@ function queueApproval(
   type: PendingApproval["type"],
   origin: string,
   requestId: string,
-  payload: unknown
+  payload: unknown,
+  tabId?: number
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const approval: PendingApproval = { requestId, type, origin, payload };
     pendingApprovals.set(requestId, { resolve, reject, approval });
 
-    // Notify popup via badge and attempt to open it.
+    // Notify popup via badge.
     chrome.action.setBadgeText({ text: "!" });
     chrome.action.setBadgeBackgroundColor({ color: "#DC2626" });
+
+    // Best-effort: try to open the side panel on the tab the request came
+    // from. This requires a recent user gesture (the dApp button click that
+    // triggered the request counts). Falls back to badge-only on failure,
+    // and the dApp will still see the approval if the user opens the side
+    // panel themselves within 5 minutes.
+    if (tabId !== undefined) {
+      try {
+        void chrome.sidePanel.open({ tabId }).catch(() => { /* ignore */ });
+      } catch {
+        // ignore — some Chromium variants block this without a user gesture
+      }
+    }
 
     // Timeout after 5 minutes.
     setTimeout(() => {

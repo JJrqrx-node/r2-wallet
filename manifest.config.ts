@@ -3,7 +3,7 @@ import type { ManifestV3Export } from "@crxjs/vite-plugin";
 const manifest: ManifestV3Export = {
   manifest_version: 3,
   name: "R2 Wallet",
-  version: "0.1.15",
+  version: "0.1.16",
   description:
     "Non-custodial wallet for the R-Squared blockchain (r2dex.io). Create accounts, hold balances, sign transactions, and connect to R-Squared dApps.",
   // No default_popup — clicking the toolbar icon opens the side panel

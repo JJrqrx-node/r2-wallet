@@ -188,12 +188,26 @@ const provider: R2WalletProvider = {
 // Freeze to prevent dApp tampering.
 Object.freeze(provider);
 
-// Assign to window — use defineProperty to prevent overwriting.
-Object.defineProperty(window, "rsquared", {
-  value: provider,
-  writable: false,
-  configurable: false,
-});
+// Assign to window — use defineProperty to prevent overwriting. If another
+// copy of the R2 Wallet extension already defined window.rsquared (e.g. a
+// dev-mode v0.1.14 left enabled alongside v0.1.16), skip — the first one
+// wins and the second one would otherwise throw a TypeError that aborts the
+// rest of this content script (which would prevent the postMessage bridge
+// from registering).
+if (
+  !(window as unknown as { rsquared?: { isR2Wallet?: boolean } }).rsquared
+  || !(window as unknown as { rsquared?: { isR2Wallet?: boolean } }).rsquared?.isR2Wallet
+) {
+  try {
+    Object.defineProperty(window, "rsquared", {
+      value: provider,
+      writable: false,
+      configurable: true, // allow a future extension reload to replace us
+    });
+  } catch {
+    // ignore — another extension copy already defined the property
+  }
+}
 
 // Announce that the provider is ready so dApps loading after document_start
 // can detect us without polling.

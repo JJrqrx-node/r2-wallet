@@ -65,6 +65,28 @@ export function App({ wide = false }: AppProps) {
     void loadState();
   }, [loadState]);
 
+  // Poll for new pending approvals every second so dApp connect/sign requests
+  // surface immediately even if the popup or side panel was already open
+  // before the request was queued. Without this, the user has to manually
+  // close and reopen the wallet UI to see the Approval button appear.
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      try {
+        chrome.runtime.sendMessage(
+          { type: "GET_PENDING_APPROVALS" },
+          (resp: unknown) => {
+            if (chrome.runtime.lastError) return;
+            const r = resp as { approvals?: PendingApproval[] } | undefined;
+            setHasPendingApproval((r?.approvals?.length ?? 0) > 0);
+          }
+        );
+      } catch {
+        // ignore — SW may be transitioning
+      }
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
   // --- Account creation / import callback ---------------------------------
 
   async function handleAccountReady(
